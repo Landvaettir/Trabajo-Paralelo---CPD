@@ -1,8 +1,8 @@
 MainComp:
-	g++ -Wall -fopenmp -lm main.cpp -o main.o
+	g++ -Wall -fopenmp -lm main.cpp UtilsFunctions.cpp -o main.o
 
 NewComp:
-	g++ -Wall -fopenmp -lm new.cpp UtilsFunctions -o new.o
+	g++ -Wall -fopenmp -lm -O2 new.cpp UtilsFunctions.cpp -o new.o
 
 MainEx:
 	./main.o
