@@ -24,6 +24,7 @@ int main(){
     std::getline(file, headers);
 
     std::vector <int> personasPorEstrato = {0,0,0,0,0,0,0,0,0,0};
+    std::vector <float> percentPorEstrato = {0,0,0,0,0,0,0,0,0,0};
 
     #pragma omp parallel
     {
@@ -47,9 +48,24 @@ int main(){
     std::cout << time << std::endl; //BORRAR
     std::cout << count << std::endl; //BORRAR
 
+    //RESPUESTAS----------
+    std::cout << "-----\nRespuestas:" << std::endl;
+
+    //1. Personas por estrato
+    std::cout << "Personas por estrato: ";
     for(int estrat : personasPorEstrato){
         std::cout << estrat << " ";
     }
+    std::cout << std::endl;
+
+    //2.Porcentaje por estrato
+    float countDb = count;
+    std::cout << "Porcentaje por estrato: ";
+    for (int i=0; i<10; i++){
+        percentPorEstrato[i] = (personasPorEstrato[i]/countDb)*100;
+        std::cout << percentPorEstrato[i] << " ";
+    }
+    std::cout << std::endl;
 
     file.close();
     return 0;
