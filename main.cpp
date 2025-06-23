@@ -35,7 +35,7 @@ int main(){
                 if (count<5 && std::getline(file, linea)){ //Delete count condition
                     std::cout << linea << std::endl;
                     std::vector <std::string> tokens = SplitStr(linea, ';');
-                    personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato);
+                    personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     count++;
                 } else {
                     linea = "";
