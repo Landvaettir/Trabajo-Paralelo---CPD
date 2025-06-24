@@ -2,6 +2,7 @@
 #ifndef UTILSFUNCTION_H
 #define UTILSFUNCTION_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -58,15 +59,13 @@ std::vector <int>& ExtraerEstrato(const std::string& cpOrigen, std::vector<int>&
 int CalcularEdad(const std::string& birthDay);
 
 /*
-* @brief Suma en uno la cantidad de persona en una especie correspondiente.
+* @brief Calcula la edad promedio de un vector que contiene edades. Y verifica que el tamaño del vector sea igual a la
+* cantidad de personas registradas en ese vector.
 *
-* @param especie (std::string&): Referencia del string correspondiente a la especie de una persona.
-* @param personasPorEspecie (std::map <std::string, int>&): Referencia del map que contiene la
-* cantidad de personas por especie.
+* @param edades (std::vector <int>&): Referencia del vector que contiene las edades.
+* @param count (int&): Referencia del entero correspondiente a la cantidad de personas registradas en el vector.
 *
-* @return Retorna el map personasPorEspecie modificado.
+* @return Retorna la edad promedio del vector.
 */
-std::map <std::string, int>& SumarPersonaEspecie(const std::string& especie, std::map <std::string, int>& personasPorEspecie);
-
-std::map <std::string, int>& SumarPersonaGenero(const std::string& genero, std::map <std::string, int>& personasPorGenero);
+float EdadPromedio (std::vector <int>& edades, int& count);
 #endif

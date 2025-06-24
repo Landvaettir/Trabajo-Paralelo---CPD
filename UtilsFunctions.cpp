@@ -61,18 +61,16 @@ int CalcularEdad(const std::string& birthDay){
     return -1;
 }
 
-std::map <std::string, int>& SumarPersonaEspecie(const std::string& especie, std::map <std::string, int>& personasPorEspecie){
-    std::string especieStr = especie;
-    especieStr.erase(0,1); //Eliminamos la comilla doble del inicio.
-    especieStr.pop_back(); //Eliminamos la comilla doble del final.
-    personasPorEspecie[especieStr] +=1;
-    return personasPorEspecie;
-}
-
-std::map <std::string, int>& SumarPersonaGenero(const std::string& genero, std::map <std::string, int>& personasPorGenero){
-    std::string generoStr = genero;
-    generoStr.erase(0,1); //Eliminamos la comilla doble del inicio.
-    generoStr.pop_back(); //Eliminamos la comilla doble del final.
-    personasPorGenero[generoStr] +=1;
-    return personasPorGenero;
+float EdadPromedio (std::vector <int>& edades, int& count){
+    unsigned long countLong = count;
+    float suma = 0.0;
+    for (int edad : edades){
+        suma += edad;
+    }
+    if (countLong == edades.size()){
+        return suma/count;
+    } else {
+        std::cerr << "ERROR: Incongruencia en los datos" << std::endl;
+        return -1.0;
+    }
 }
