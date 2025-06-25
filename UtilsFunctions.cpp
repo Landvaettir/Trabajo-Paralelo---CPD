@@ -61,7 +61,7 @@ int CalcularEdad(const std::string& birthDay){
     return -1;
 }
 
-float EdadPromedio (std::vector <int>& edades, int& count){
+float EdadPromedio(std::vector <int>& edades, int& count){
     unsigned long countLong = count;
     float suma = 0.0;
     for (int edad : edades){
@@ -72,5 +72,15 @@ float EdadPromedio (std::vector <int>& edades, int& count){
     } else {
         std::cerr << "ERROR: Incongruencia en los datos" << std::endl;
         return -1.0;
+    }
+}
+
+float EdadMediana(std::vector <int>& edades){
+    if (edades.size()%2 == 0){
+        int mid = edades.size()/2;
+        return (edades[mid-1]+edades[mid])/2.0f;
+    } else {
+        int mid = edades.size()/2;
+        return edades[mid];
     }
 }

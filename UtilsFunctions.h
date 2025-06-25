@@ -68,4 +68,13 @@ int CalcularEdad(const std::string& birthDay);
 * @return Retorna la edad promedio del vector.
 */
 float EdadPromedio (std::vector <int>& edades, int& count);
+
+/*
+* @brief Calcula la edad mediana de un vector que contiene edades.
+*
+* @param edades (std::vector <int>&): Referencia del vector que contiene las edades.
+*
+* @return Retorna la edad mediana del vector.
+*/
+float EdadMediana(std::vector <int>& edades);
 #endif

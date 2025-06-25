@@ -4,8 +4,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <omp.h>
+#include <algorithm>
 #include <ctime>
+#include <omp.h>
 
 //Libreria funciones auxiliares
 #include "UtilsFunctions.h"
@@ -40,10 +41,10 @@ int main(){
     #pragma omp parallel
     {
         std::string linea;
-        while (flag){ //Change condition count<5 -> std::getline(file, linea)
+        while (count<30){ //Change condition count<1 -> flag
             #pragma omp critical
             {
-                if (std::getline(file, linea)){ //Delete count condition
+                if (std::getline(file, linea)){
                     //std::cout << linea << std::endl; //BORRAR
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
@@ -79,26 +80,28 @@ int main(){
                         edadesOtro.push_back(edad);
                         personasPorGenero["OTRO"] +=1;
                     }
-
                     count++;
-                    //std::cout << count << std::endl;
                 } else {
-                    linea = "";
                     flag = false;
                 }
-
-
             }
         }
     }
+    
+    //Ordenamiento de los vectores de edad
+    std::sort(edadesHuman.begin(), edadesHuman.end());
+    std::sort(edadesElf.begin(), edadesElf.end());
+    std::sort(edadesEnana.begin(), edadesEnana.end());
+    std::sort(edadesHBestia.begin(), edadesHBestia.end());
+
     t1 = clock(); //BORRAR
     double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
     std::cout << "Tiempo Ejecución:" << time << std::endl; //BORRAR
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
-    
+/*   
     //RESPUESTAS----------
     std::cout << "-----\nRespuestas:" << std::endl;
-/*
+
     //1. Personas por estrato
     std::cout << "1. Personas por estrato:" << std::endl;
     for(int i=0; i<10; i++){
@@ -125,6 +128,17 @@ int main(){
     std::cout << "Edad promedio género Macho: " << EdadPromedio(edadesMacho, personasPorGenero["MACHO"]) << std::endl;
     std::cout << "Edad promedio género Hembra: " << EdadPromedio(edadesHembra, personasPorGenero["HEMBRA"]) << std::endl;
     std::cout << "Edad promedio género Otro: " << EdadPromedio(edadesOtro, personasPorGenero["OTRO"]) << std::endl;
+
+    //4. Edad mediana por especie y genero
+    std::cout << "4. Edades mediana por especie y género:" << std::endl;
+    std::cout << "Edad mediana especie Humana: " << EdadMediana(edadesHuman) << std::endl;
+    std::cout << "Edad mediana especie Elfica: " << EdadMediana(edadesElf) << std::endl;
+    std::cout << "Edad mediana especie Enana: " << EdadMediana(edadesEnana) << std::endl;
+    std::cout << "Edad mediana especie Hombre Bestia: " << EdadMediana(edadesHBestia) << std::endl;
+    std::cout << std::endl;
+    std::cout << "Edad mediana género Macho: " << EdadMediana(edadesMacho) << std::endl;
+    std::cout << "Edad mediana género Hembra: " << EdadMediana(edadesHembra) << std::endl;
+    std::cout << "Edad mediana género Otro: " << EdadMediana(edadesOtro) << std::endl;
 */
 
     file.close();

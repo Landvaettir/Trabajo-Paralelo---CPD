@@ -4,8 +4,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <omp.h>
+#include <algorithm>
 #include <ctime>
+#include <omp.h>
 
 //Libreria funciones auxiliares
 #include "UtilsFunctions.h"
@@ -21,6 +22,7 @@ int main(){
     };
 
     int count = 0;
+    bool flag = true;
     std::vector <int> personasPorEstrato = {0,0,0,0,0,0,0,0,0,0};
     std::vector <float> percentPorEstrato = {0,0,0,0,0,0,0,0,0,0};
 
@@ -39,14 +41,16 @@ int main(){
     #pragma omp parallel
     {
         std::string linea;
-        while (count<10000000){ //Change condition -> std::getline(file, linea)
+        while (count<1000000){ //Change condition -> flag
             #pragma omp critical
             {
-                if (count<10000000 && std::getline(file, linea)){ //Delete count condition count<5 && 
+                if (std::getline(file, linea)){ //Delete count condition count<5 && 
+                    //std::cout << linea << std::endl; //BORRAR
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     
                     int edad = CalcularEdad(tokens[5]); //P3
+                    //std::cout << edad << std::endl; //BORRAR
                     std::string especie = tokens[1];
                     std::string genero = tokens[2];
                     especie.erase(0,1); //Eliminamos la comilla doble del inicio.
@@ -78,11 +82,18 @@ int main(){
                     }
                     count++;
                 } else {
-                    linea = "";
+                    flag = false;
                 }
             }
         }  
     }
+    
+    //Ordenamiento de los vectores de edad
+    std::sort(edadesHuman.begin(), edadesHuman.end());
+    std::sort(edadesElf.begin(), edadesElf.end());
+    std::sort(edadesEnana.begin(), edadesEnana.end());
+    std::sort(edadesHBestia.begin(), edadesHBestia.end());
+
     t1 = clock(); //BORRAR
     double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
     std::cout << "Tiempo Ejecución:" << time << std::endl; //BORRAR
@@ -118,6 +129,16 @@ int main(){
     std::cout << "   Edad promedio género Hembra: " << EdadPromedio(edadesHembra, personasPorGenero["HEMBRA"]) << std::endl;
     std::cout << "   Edad promedio género Otro: " << EdadPromedio(edadesOtro, personasPorGenero["OTRO"]) << std::endl;
 
+    //4. Edad mediana por especie y genero
+    std::cout << "4. Edades mediana por especie y género:" << std::endl;
+    std::cout << "   Edad mediana especie Humana: " << EdadMediana(edadesHuman) << std::endl;
+    std::cout << "   Edad mediana especie Elfica: " << EdadMediana(edadesElf) << std::endl;
+    std::cout << "   Edad mediana especie Enana: " << EdadMediana(edadesEnana) << std::endl;
+    std::cout << "   Edad mediana especie Hombre Bestia: " << EdadMediana(edadesHBestia) << std::endl;
+    std::cout << std::endl;
+    std::cout << "   Edad mediana género Macho: " << EdadMediana(edadesMacho) << std::endl;
+    std::cout << "   Edad mediana género Hembra: " << EdadMediana(edadesHembra) << std::endl;
+    std::cout << "   Edad mediana género Otro: " << EdadMediana(edadesOtro) << std::endl;
 
     file.close();
     return 0;
