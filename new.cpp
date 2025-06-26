@@ -26,10 +26,10 @@ int main(){
     std::vector <int> personasPorEstrato = {0,0,0,0,0,0,0,0,0,0};
     std::vector <float> percentPorEstrato = {0,0,0,0,0,0,0,0,0,0};
 
-    std::map <std::string, int> personasPorEspecie = { //AUX
+    std::map <std::string, int> personasPorEspecie = {
         {"Humana", 0}, {"Elfica", 0}, {"Enana", 0}, {"Hombre Bestia", 0}
     };
-    std::map <std::string, int> personasPorGenero = { //AUX
+    std::map <std::string, int> personasPorGenero = {
         {"MACHO", 0}, {"HEMBRA", 0}, {"OTRO", 0}
     };
     std::vector <int> edadesHuman, edadesElf, edadesEnana, edadesHBestia;
@@ -49,7 +49,7 @@ int main(){
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     
-                    int edad = CalcularEdad(tokens[5]); //P3
+                    int edad = CalcularEdad(tokens[5]); //P.3
                     //std::cout << edad << std::endl; //BORRAR
                     std::string especie = tokens[1];
                     std::string genero = tokens[2];
@@ -88,11 +88,28 @@ int main(){
         }
     }
     
-    //Ordenamiento de los vectores de edad
+    //Ordenamiento de los vectores de edad - P.4
     std::sort(edadesHuman.begin(), edadesHuman.end());
     std::sort(edadesElf.begin(), edadesElf.end());
     std::sort(edadesEnana.begin(), edadesEnana.end());
     std::sort(edadesHBestia.begin(), edadesHBestia.end());
+    
+    std::sort(edadesMacho.begin(), edadesMacho.end());
+    std::sort(edadesHembra.begin(), edadesHembra.end());
+    std::sort(edadesOtro.begin(), edadesOtro.end());
+
+    //Segmentaciòn de edades - P.5
+    std::map <std::string, int> edadesHumanSegm, edadesElfSegm, edadesEnanaSegm, edadesHBestiaSegm;
+    std::map <std::string, int> edadesMachoSegm, edadesHembraSegm, edadesOtroSegm;
+
+    edadesHumanSegm = SegmentarEdad(edadesHuman, edadesHumanSegm);
+    edadesElfSegm = SegmentarEdad(edadesElf, edadesElfSegm);
+    edadesEnanaSegm = SegmentarEdad(edadesEnana, edadesEnanaSegm);
+    edadesHBestiaSegm = SegmentarEdad(edadesHBestia, edadesHBestiaSegm);
+
+    edadesMachoSegm = SegmentarEdad(edadesMacho, edadesMachoSegm);
+    edadesHembraSegm = SegmentarEdad(edadesHembra, edadesHembraSegm);
+    edadesOtroSegm = SegmentarEdad(edadesOtro, edadesOtroSegm);
 
     t1 = clock(); //BORRAR
     double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
@@ -139,8 +156,53 @@ int main(){
     std::cout << "Edad mediana género Macho: " << EdadMediana(edadesMacho) << std::endl;
     std::cout << "Edad mediana género Hembra: " << EdadMediana(edadesHembra) << std::endl;
     std::cout << "Edad mediana género Otro: " << EdadMediana(edadesOtro) << std::endl;
-*/
 
+    //5. Proporción segmentada de la población
+    std::cout << "5. Proporción segmentada de la población según especie y género:" << std::endl;
+    std::cout << "   Especie Humana: " << std::endl << "    ";
+    float size = edadesHuman.size();
+    for(auto& pair:edadesHumanSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << "   Especie Elfica: " << std::endl << "    ";
+    size = edadesElf.size();
+    for(auto& pair:edadesElfSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << "   Especie Enana: " << std::endl << "    ";
+    size = edadesEnana.size();
+    for(auto& pair:edadesEnanaSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << "   Especie Hombre Bestia: " << std::endl << "    ";
+    size = edadesHBestia.size();
+    for(auto& pair:edadesHBestiaSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "   Género Macho: " << std::endl << "    ";
+    size = edadesMacho.size();
+    for(auto& pair:edadesMachoSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << "   Género Hembra: " << std::endl << "    ";
+    size = edadesHembra.size();
+    for(auto& pair:edadesHembraSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+    std::cout << "   Género Otro: " << std::endl << "    ";
+    size = edadesOtro.size();
+    for(auto& pair:edadesOtroSegm){
+        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+    }
+    std::cout << std::endl;
+*/
     file.close();
     return 0;
 }

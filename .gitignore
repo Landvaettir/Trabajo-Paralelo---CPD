@@ -1,5 +1,6 @@
-eldoria.csv
+*.csv
 Python
 .vscode
 *.o
+asd.*
 new.*

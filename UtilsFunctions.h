@@ -8,6 +8,7 @@
 #include <sstream>
 #include <ctime>
 #include <map>
+#include <omp.h>
 
 /*
 * @brief Separa un string segùn el delimitador especificado, si no se especifìca el delimitador,
@@ -77,4 +78,17 @@ float EdadPromedio (std::vector <int>& edades, int& count);
 * @return Retorna la edad mediana del vector.
 */
 float EdadMediana(std::vector <int>& edades);
+
+/*
+* @brief Segmenta en 4 rangos las edades de un vector que contiene edades.
+* Los rangos son "<18", "18-35", "36-60" y "60<"
+*
+* @param edades (std::vector <int>&): Referencia del vector que contiene las edades.
+* @param edadesSegm (std::map <std::string, int>&): Referencia del map que contiene la cantidad de edades por segmento.
+*
+* @return Retorna el map edadesSegm modificado.
+*
+* @warning FUNCIÓN PARALELA
+*/
+std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm);
 #endif

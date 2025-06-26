@@ -84,3 +84,25 @@ float EdadMediana(std::vector <int>& edades){
         return edades[mid];
     }
 }
+
+std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm){
+    edadesSegm = {{">18", 0}, {"18-35", 0}, {"36-60", 0}, {"60<", 0}};
+    int size = edades.size();
+    #pragma omp parallel for
+    for (int i=0; i<size; i++){
+        #pragma omp critical
+        {
+            if (edades[i] < 18){
+                edadesSegm[">18"] += 1;
+            } else if ((18 < edades[i]) && (edades[i] < 36)){
+                edadesSegm["18-35"] += 1;
+            } else if ((35 < edades[i]) && (edades[i] < 61)){
+                edadesSegm["36-60"] += 1;
+            } else if (60 < edades[i]){
+                edadesSegm["60<"] += 1;
+            }
+        }
+    }
+    
+    return edadesSegm;
+}
