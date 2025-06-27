@@ -86,14 +86,14 @@ float EdadMediana(std::vector <int>& edades){
 }
 
 std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm){
-    edadesSegm = {{">18", 0}, {"18-35", 0}, {"36-60", 0}, {"60<", 0}};
+    edadesSegm = {{"0-17", 0}, {"18-35", 0}, {"36-60", 0}, {"60<", 0}};
     int size = edades.size();
     #pragma omp parallel for
     for (int i=0; i<size; i++){
         #pragma omp critical
         {
             if (edades[i] < 18){
-                edadesSegm[">18"] += 1;
+                edadesSegm["0-17"] += 1;
             } else if ((18 < edades[i]) && (edades[i] < 36)){
                 edadesSegm["18-35"] += 1;
             } else if ((35 < edades[i]) && (edades[i] < 61)){
@@ -110,4 +110,30 @@ std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::ma
     std::string ciudad = cpDestino.substr(2,6);
     visitas[ciudad] += 1;
     return visitas;
+}
+
+std::vector<std::pair<std::string, int>> ExtraerTop10000(std::map <std::string, int>& visitasPoblados){
+    auto comp = [](const auto& a,  const auto& b){return a.second > b.second;};
+
+    std::priority_queue <
+        std::pair <std::string, int>, //{frecuencia, ciudad}
+        std::vector <std::pair<std::string, int>>,
+        decltype(comp) //Menor frecuencia al tope
+    > minHeap(comp);
+
+    for(const auto& [ciudad, visitas] : visitasPoblados){
+        minHeap.push({ciudad, visitas});
+        if (minHeap.size() > 10000){
+            minHeap.pop(); //Se elimina la ciudad con menos visitas del heap
+        }
+    }
+
+    std::vector<std::pair<std::string, int>> topPoblados;
+    while(!minHeap.empty()){
+        topPoblados.push_back(minHeap.top());
+        minHeap.pop();
+    }
+
+    std::reverse(topPoblados.begin(), topPoblados.end());
+    return topPoblados;
 }

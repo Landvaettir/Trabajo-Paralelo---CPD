@@ -9,6 +9,7 @@
 #include <ctime>
 #include <map>
 #include <queue>
+#include <algorithm>
 #include <omp.h>
 
 /*
@@ -82,7 +83,7 @@ float EdadMediana(std::vector <int>& edades);
 
 /*
 * @brief Segmenta en 4 rangos las edades de un vector que contiene edades.
-* Los rangos son "<18", "18-35", "36-60" y "60<"
+* Los rangos son "0-17", "18-35", "36-60" y "60<"
 *
 * @param edades (std::vector <int>&): Referencia del vector que contiene las edades.
 * @param edadesSegm (std::map <std::string, int>&): Referencia del map que contiene la cantidad de edades por segmento.
@@ -102,4 +103,14 @@ std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <
 * @return Retorna el map visitas modificado.
 */
 std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::map <std::string, int>& visitas);
+
+/*
+* @brief Extrae las 10000 ciudades más visitadas.
+*
+* @param visitasPoblados (std::map <std::string, int>&): Referencia del map que contiene el número de ciudad y su
+* cantidad de visitas.
+*
+* @return Retorna un vector de pares con el número de la ciudad y su cantidad de visitas.
+*/
+std::vector<std::pair<std::string, int>> ExtraerTop10000(std::map <std::string, int>& visitasPoblados);
 #endif

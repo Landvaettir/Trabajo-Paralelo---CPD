@@ -11,11 +11,8 @@
 //Libreria funciones auxiliares
 #include "UtilsFunctions.h"
 
-unsigned t0, t1; //BORRAR
-
 int main(){
     std::ifstream file("eldoria.csv");
-    t0 = clock(); //BORRAR
     if (!file.is_open()){
         std::cerr << "Error: No se puede abrir el archivo" << std::endl;
         return 1;
@@ -37,6 +34,9 @@ int main(){
 
     int dependientes = 0;
     int independientes = 0;
+
+    std::map <std::string, int> visitasPoblados;
+    std::vector<std::pair<std::string, int>> top10000Poblados;
 
     std::string headers;
     std::getline(file, headers);
@@ -89,6 +89,8 @@ int main(){
                     } else {
                         independientes += 1;
                     }
+
+                    VisitasCiudad(tokens[7], visitasPoblados); //P.8
                     count++;
                 } else {
                     flag = false;
@@ -121,9 +123,9 @@ int main(){
     edadesHembraSegm = SegmentarEdad(edadesHembra, edadesHembraSegm);
     edadesOtroSegm = SegmentarEdad(edadesOtro, edadesOtroSegm);
 
-    t1 = clock(); //BORRAR
-    double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
-    std::cout << "Tiempo Ejecución:" << time << std::endl; //BORRAR
+    //Extraer top 10000 poblados más visitados
+    top10000Poblados = ExtraerTop10000(visitasPoblados);
+
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
 
     //RESPUESTAS----------
@@ -252,6 +254,12 @@ int main(){
     //7. Índice de dependencia
     std::cout << "7. Índice de dependencia: " << (dependientes*1.0f)/(independientes*1.0f) << std::endl;
     std::cout << "-----" << std::endl;
+
+    //8. 10000 poblados más visitados
+    std::cout << "8. 10000 poblados más visitados" << std::endl;
+    for (std::pair par:top10000Poblados){
+        std::cout << "Ciudad " << par.first << ": " << par.second << "visitas" << std::endl;
+    }
 
     return 0;
 }

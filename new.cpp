@@ -11,11 +11,8 @@
 //Libreria funciones auxiliares
 #include "UtilsFunctions.h"
 
-unsigned t0, t1; //BORRAR
-
 int main(){
     std::ifstream file("eldoria.csv");
-    t0 = clock();
     if (!file.is_open()){
         std::cerr << "Error: No se puede abrir el archivo" << std::endl;
         return 1;
@@ -39,6 +36,7 @@ int main(){
     int independientes = 0;
 
     std::map <std::string, int> visitasPoblados;
+    std::vector<std::pair<std::string, int>> top10000Poblados;
 
     std::string headers;
     std::getline(file, headers);
@@ -46,11 +44,11 @@ int main(){
     #pragma omp parallel
     {
         std::string linea;
-        while (count<1000){ //Change condition count<1 -> flag
+        while (count<100){ //Change condition count<1 -> flag
             #pragma omp critical
             {
                 if (std::getline(file, linea)){
-                    std::cout << linea << std::endl; //BORRAR
+                    //std::cout << linea << std::endl; //BORRAR
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     
@@ -125,11 +123,11 @@ int main(){
     edadesHembraSegm = SegmentarEdad(edadesHembra, edadesHembraSegm);
     edadesOtroSegm = SegmentarEdad(edadesOtro, edadesOtroSegm);
 
-    t1 = clock(); //BORRAR
-    double tiempo = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
-    std::cout << "Tiempo Ejecución:" << tiempo << std::endl; //BORRAR
+    //Extraer top 10000 poblados ma visitados
+    top10000Poblados = ExtraerTop10000(visitasPoblados);
+
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
-/*  
+  
     //RESPUESTAS----------
     std::cout << "-----\nRespuestas:" << std::endl;
 
@@ -159,6 +157,7 @@ int main(){
     std::cout << "Edad promedio género Macho: " << EdadPromedio(edadesMacho, personasPorGenero["MACHO"]) << std::endl;
     std::cout << "Edad promedio género Hembra: " << EdadPromedio(edadesHembra, personasPorGenero["HEMBRA"]) << std::endl;
     std::cout << "Edad promedio género Otro: " << EdadPromedio(edadesOtro, personasPorGenero["OTRO"]) << std::endl;
+    std::cout << "-----" << std::endl;
 
     //4. Edad mediana por especie y genero
     std::cout << "4. Edades mediana por especie y género:" << std::endl;
@@ -170,6 +169,7 @@ int main(){
     std::cout << "Edad mediana género Macho: " << EdadMediana(edadesMacho) << std::endl;
     std::cout << "Edad mediana género Hembra: " << EdadMediana(edadesHembra) << std::endl;
     std::cout << "Edad mediana género Otro: " << EdadMediana(edadesOtro) << std::endl;
+    std::cout << "-----" << std::endl;
 
     //5. Proporción segmentada de la población
     std::cout << "5. Proporción segmentada de la población según especie y género:" << std::endl;
@@ -216,6 +216,7 @@ int main(){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
+    std::cout << "-----" << std::endl;
 
     //6. Pirámide de edades
     std::cout << "6. Pirámide de edades:" << std::endl;
@@ -248,13 +249,16 @@ int main(){
     for (auto& segm : edadesOtroSegm){
         std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
     }
+    std::cout << "-----" << std::endl;
   
     //7. Índice de dependencia
     std::cout << "7. Índice de dependencia: " << (dependientes*1.0f)/(independientes*1.0f) << std::endl;
-*/
-
-    for (auto& pair : visitasPoblados){
-        std::cout << pair.first << ":" << pair.second << std::endl;
+    std::cout << "-----" << std::endl;
+    
+    //8. 10000 poblados más visitados
+    std::cout << "8. 10000 poblados más visitados" << std::endl;
+    for (std::pair par:top10000Poblados){
+        std::cout << "Ciudad " << par.first << ": " << par.second << " visitas" << std::endl;
     }
 
     return 0;
