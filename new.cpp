@@ -34,6 +34,9 @@ int main(){
     };
     std::vector <int> edadesHuman, edadesElf, edadesEnana, edadesHBestia;
     std::vector <int> edadesMacho, edadesHembra, edadesOtro;
+    
+    int dependientes = 0;
+    int independientes = 0;
 
     std::string headers;
     std::getline(file, headers);
@@ -72,13 +75,19 @@ int main(){
                     }
                     if (genero == "MACHO"){
                         edadesMacho.push_back(edad);
-                        personasPorGenero["MACHO"] +=1;
+                        personasPorGenero["MACHO"] += 1;
                     } else if (genero == "HEMBRA"){
                         edadesHembra.push_back(edad);
-                        personasPorGenero["HEMBRA"] +=1;
+                        personasPorGenero["HEMBRA"] += 1;
                     } else if (genero == "OTRO"){
                         edadesOtro.push_back(edad);
-                        personasPorGenero["OTRO"] +=1;
+                        personasPorGenero["OTRO"] += 1;
+                    }
+
+                    if ((edad<15) || (edad>64)){ //P.7
+                        dependientes += 1;
+                    } else {
+                        independientes += 1;
                     }
                     count++;
                 } else {
@@ -87,6 +96,7 @@ int main(){
             }
         }
     }
+    file.close();
     
     //Ordenamiento de los vectores de edad - P.4
     std::sort(edadesHuman.begin(), edadesHuman.end());
@@ -98,7 +108,7 @@ int main(){
     std::sort(edadesHembra.begin(), edadesHembra.end());
     std::sort(edadesOtro.begin(), edadesOtro.end());
 
-    //Segmentaciòn de edades - P.5
+    //Segmentación de edades - P.5-6
     std::map <std::string, int> edadesHumanSegm, edadesElfSegm, edadesEnanaSegm, edadesHBestiaSegm;
     std::map <std::string, int> edadesMachoSegm, edadesHembraSegm, edadesOtroSegm;
 
@@ -115,7 +125,7 @@ int main(){
     double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
     std::cout << "Tiempo Ejecución:" << time << std::endl; //BORRAR
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
-/*   
+/*  
     //RESPUESTAS----------
     std::cout << "-----\nRespuestas:" << std::endl;
 
@@ -159,50 +169,84 @@ int main(){
 
     //5. Proporción segmentada de la población
     std::cout << "5. Proporción segmentada de la población según especie y género:" << std::endl;
-    std::cout << "   Especie Humana: " << std::endl << "    ";
+    std::cout << "Especie Humana: " << std::endl;
     float size = edadesHuman.size();
     for(auto& pair:edadesHumanSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
-    std::cout << "   Especie Elfica: " << std::endl << "    ";
+    std::cout << "Especie Elfica: " << std::endl;
     size = edadesElf.size();
     for(auto& pair:edadesElfSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
-    std::cout << "   Especie Enana: " << std::endl << "    ";
+    std::cout << "Especie Enana: " << std::endl;
     size = edadesEnana.size();
     for(auto& pair:edadesEnanaSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
-    std::cout << "   Especie Hombre Bestia: " << std::endl << "    ";
+    std::cout << "Especie Hombre Bestia: " << std::endl;
     size = edadesHBestia.size();
     for(auto& pair:edadesHBestiaSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
     std::cout << std::endl;
-    std::cout << "   Género Macho: " << std::endl << "    ";
+    std::cout << "Género Macho: " << std::endl;
     size = edadesMacho.size();
     for(auto& pair:edadesMachoSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
-    std::cout << "   Género Hembra: " << std::endl << "    ";
+    std::cout << "Género Hembra: " << std::endl;
     size = edadesHembra.size();
     for(auto& pair:edadesHembraSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
-    std::cout << "   Género Otro: " << std::endl << "    ";
+    std::cout << "Género Otro: " << std::endl;
     size = edadesOtro.size();
     for(auto& pair:edadesOtroSegm){
         std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
     std::cout << std::endl;
+
+    //6. Pirámide de edades
+    std::cout << "6. Pirámide de edades:" << std::endl;
+    std::cout << "   Especie Humana" <<std::endl;
+    for (auto& segm : edadesHumanSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << "   Especie Elfica" <<std::endl;
+    for (auto& segm : edadesElfSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << "   Especie Enana" <<std::endl;
+    for (auto& segm : edadesEnanaSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << "   Especie Hombre Bestia" <<std::endl;
+    for (auto& segm : edadesHBestiaSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "   Género Macho" <<std::endl;
+    for (auto& segm : edadesMachoSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << "   Género Hembra" <<std::endl;
+    for (auto& segm : edadesHembraSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+    std::cout << "   Género Otro" <<std::endl;
+    for (auto& segm : edadesOtroSegm){
+        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+    }
+  
+    //7. Índice de dependencia
+    std::cout << "7. Índice de dependencia: " << (dependientes*1.0f)/(independientes*1.0f) << std::endl;
 */
-    file.close();
     return 0;
 }

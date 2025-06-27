@@ -103,6 +103,5 @@ std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <
             }
         }
     }
-    
     return edadesSegm;
 }
