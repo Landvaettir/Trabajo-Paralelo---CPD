@@ -105,3 +105,9 @@ std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <
     }
     return edadesSegm;
 }
+
+std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::map <std::string, int>& visitas){
+    std::string ciudad = cpDestino.substr(2,6);
+    visitas[ciudad] += 1;
+    return visitas;
+}

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UTILSFUNCTION_H
-#define UTILSFUNCTION_H
+#ifndef UTILSFUNCTIONS_H
+#define UTILSFUNCTIONS_H
 
 #include <iostream>
 #include <string>
@@ -8,6 +8,7 @@
 #include <sstream>
 #include <ctime>
 #include <map>
+#include <queue>
 #include <omp.h>
 
 /*
@@ -91,4 +92,14 @@ float EdadMediana(std::vector <int>& edades);
 * @warning FUNCIÓN PARALELA
 */
 std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm);
+
+/*
+* @brief Extrae la provincia y ciudad a la que viaja una persona en base al CP destino.
+*
+* @param cpDestino (std::string&): Referencia del string correspondiente al código postal de destino.
+* @param visitas (std::map <std::string, int>&): Referencia del map que contiene la cantidad de visitas a una ciudad.
+*
+* @return Retorna el map visitas modificado.
+*/
+std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::map <std::string, int>& visitas);
 #endif

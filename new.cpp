@@ -38,17 +38,19 @@ int main(){
     int dependientes = 0;
     int independientes = 0;
 
+    std::map <std::string, int> visitasPoblados;
+
     std::string headers;
     std::getline(file, headers);
 
     #pragma omp parallel
     {
         std::string linea;
-        while (count<30){ //Change condition count<1 -> flag
+        while (count<1000){ //Change condition count<1 -> flag
             #pragma omp critical
             {
                 if (std::getline(file, linea)){
-                    //std::cout << linea << std::endl; //BORRAR
+                    std::cout << linea << std::endl; //BORRAR
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     
@@ -89,6 +91,8 @@ int main(){
                     } else {
                         independientes += 1;
                     }
+
+                    VisitasCiudad(tokens[7], visitasPoblados); //P.8
                     count++;
                 } else {
                     flag = false;
@@ -122,8 +126,8 @@ int main(){
     edadesOtroSegm = SegmentarEdad(edadesOtro, edadesOtroSegm);
 
     t1 = clock(); //BORRAR
-    double time = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
-    std::cout << "Tiempo Ejecución:" << time << std::endl; //BORRAR
+    double tiempo = (double(t1-t0)/CLOCKS_PER_SEC); //BORRAR
+    std::cout << "Tiempo Ejecución:" << tiempo << std::endl; //BORRAR
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
 /*  
     //RESPUESTAS----------
@@ -248,5 +252,10 @@ int main(){
     //7. Índice de dependencia
     std::cout << "7. Índice de dependencia: " << (dependientes*1.0f)/(independientes*1.0f) << std::endl;
 */
+
+    for (auto& pair : visitasPoblados){
+        std::cout << pair.first << ":" << pair.second << std::endl;
+    }
+
     return 0;
 }

@@ -44,7 +44,7 @@ int main(){
     #pragma omp parallel
     {
         std::string linea;
-        while (count<1000000){ //Change condition -> flag
+        while (count<10000){ //Change condition -> flag
             #pragma omp critical
             {
                 if (std::getline(file, linea)){ 
