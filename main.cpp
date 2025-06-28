@@ -44,16 +44,14 @@ int main(){
     #pragma omp parallel
     {
         std::string linea;
-        while (count<10000){ //Change condition -> flag
+        while (flag){ //Change condition -> flag
             #pragma omp critical
             {
                 if (std::getline(file, linea)){ 
-                    //std::cout << linea << std::endl; //BORRAR
                     std::vector <std::string> tokens = SplitStr(linea, ';');
                     personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
                     
                     int edad = CalcularEdad(tokens[5]); //P3
-                    //std::cout << edad << std::endl; //BORRAR
                     std::string especie = tokens[1];
                     std::string genero = tokens[2];
                     especie.erase(0,1); //Eliminamos la comilla doble del inicio.
@@ -127,7 +125,7 @@ int main(){
     top10000Poblados = ExtraerTop10000(visitasPoblados);
 
     std::cout << "Total de datos:" << count << std::endl; //BORRAR
-
+/*
     //RESPUESTAS----------
     std::cout << "-----\nRespuestas:" << std::endl;
 
@@ -260,6 +258,6 @@ int main(){
     for (std::pair par:top10000Poblados){
         std::cout << "Ciudad " << par.first << ": " << par.second << "visitas" << std::endl;
     }
-
+*/
     return 0;
 }
