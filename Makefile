@@ -1,5 +1,5 @@
 MainComp:
-	g++ -Wall -fopenmp -lm main.cpp UtilsFunctions.cpp -o main.o
+	g++ -Wall -fopenmp -lm -O2 main.cpp UtilsFunctions.cpp -o main.o
 
 MainEx: 
 	./main.o
