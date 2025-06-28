@@ -11,6 +11,8 @@
 //Libreria funciones auxiliares
 #include "UtilsFunctions.h"
 
+omp_set_num_threads(omp_get_max_threads());
+
 int main(){
     std::ifstream file("eldoria.csv");
     if (!file.is_open()){
