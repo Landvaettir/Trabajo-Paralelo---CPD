@@ -2,7 +2,7 @@ MainComp:
 	g++ -std=c++17 -Wall -fopenmp -lm -O3 main.cpp UtilsFunctions.cpp -o main.o
 
 MainEx: 
-	./main.o
+	time ./main.o
 
 Main: 
 	MainComp
