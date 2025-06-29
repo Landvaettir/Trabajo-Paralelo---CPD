@@ -8,10 +8,7 @@ Main:
 	MainComp
 	MainEx
 
-
 Clear:
 	rm *.o *.txt
-
-
 
 .DEFAULT_GOAL = Main
