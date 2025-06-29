@@ -1,17 +1,19 @@
 #include "UtilsFunctions.h"
 
-std::vector <std::string> SplitStr(const std::string& str, char delimiter = ' '){
-    std::vector <std::string> tokens;
-    std::stringstream ss(str);
-    std::string token;
-    while (std::getline(ss, token, delimiter)){
+using namespace std;
+
+vector <string> SplitStr(const string& str, char delimiter = ' '){
+    vector <string> tokens;
+    stringstream ss(str);
+    string token;
+    while (getline(ss, token, delimiter)){
         tokens.push_back(token);
     }
     return tokens;
 }
 
-int MesAInt(const std::string& mes){
-    std::map <std::string, int> meses = {
+int MesAInt(const string& mes){
+    map <string, int> meses = {
         {"Jan", 1}, {"Feb", 2}, {"Mar", 3}, {"Apr", 4},{"May", 5}, {"Jun", 6},
         {"Jul", 7}, {"Aug", 8}, {"Sep", 9}, {"Oct", 10},{"Nov", 11}, {"Dec", 12},
         {"Ene", 1}, {"Abr", 4}, {"Ago", 8}, {"Dic", 12}
@@ -24,38 +26,28 @@ int MesAInt(const std::string& mes){
     }
 }
 
-std::vector <int>& ExtraerEstrato(const std::string& cpOrigen, std::vector<int>& estratos){
+vector <int>& ExtraerEstrato(const string& cpOrigen, vector<int>& estratos){
     char estratoChar = cpOrigen[1];
     int estratoInt = estratoChar - '0';
     estratos[estratoInt] +=1;
     return estratos;
 }
 
-int CalcularEdad(const std::string& birthDay){
-    time_t timestamp;
-    time(&timestamp);
-    std::vector <std::string> fechaHoraVect = SplitStr(birthDay, 'T');
-    std::string fecha = fechaHoraVect[0];
-    std::string hora = fechaHoraVect[1];
-    std::vector <std::string> fechaVect = SplitStr(fecha, '-');
-    int yearBirth = stoi(fechaVect[0].substr(1,4));
-    int monthBirth = stoi(fechaVect[1]);
-    int dayBirth = stoi(fechaVect[2]);
+int CalcularEdad(const string& birthDay){
+    string fecha = birthDay.substr(1,9);
+    int yearBirth = stoi(fecha.substr(0,4));
+    int monthBirth = stoi(fecha.substr(5,2));
+    int dayBirth = stoi(fecha.substr(8,2));
 
-    std::vector <std::string> fechaHoraHoy = SplitStr(ctime(&timestamp), ' '); //Sat Jun 21 01:31:49 2025
-    int yearToday = stoi(fechaHoraHoy[4]);
-    int monthToday = MesAInt(fechaHoraHoy[1]);
-    int dayToday = stoi(fechaHoraHoy[2]);
-
-    if (monthBirth<monthToday){
-        return yearToday-yearBirth;
-    } else if (monthBirth>monthToday){
-        return yearToday-yearBirth-1;
+    if (monthBirth<7){
+        return 2025-yearBirth;
+    } else if (monthBirth>7){
+        return 2025-yearBirth-1;
     } else {
-        if (dayBirth<=dayToday){
-            return yearToday-yearBirth;
+        if (dayBirth<=2){
+            return 2025-yearBirth;
         } else {
-            return yearToday-yearBirth-1;
+            return 2025-yearBirth-1;
         }
     }
     return -1;
@@ -75,7 +67,7 @@ float EdadPromedio(std::vector <int>& edades, int& count){
     }
 }
 
-float EdadMediana(std::vector <int>& edades){
+float EdadMediana(vector <int>& edades){
     if (edades.size()%2 == 0){
         int mid = edades.size()/2;
         return (edades[mid-1]+edades[mid])/2.0f;
@@ -85,7 +77,7 @@ float EdadMediana(std::vector <int>& edades){
     }
 }
 
-std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm){
+map <string, int>& SegmentarEdad(vector <int>& edades, map <string, int>& edadesSegm){
     edadesSegm = {{"0-17", 0}, {"18-35", 0}, {"36-60", 0}, {"60<", 0}};
     int size = edades.size();
     #pragma omp parallel for
@@ -106,18 +98,18 @@ std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <
     return edadesSegm;
 }
 
-std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::map <std::string, int>& visitas){
-    std::string ciudad = cpDestino.substr(2,6);
+map <string, int>& VisitasCiudad(const string& cpDestino, map <string, int>& visitas){
+    string ciudad = cpDestino.substr(2,6);
     visitas[ciudad] += 1;
     return visitas;
 }
 
-std::vector<std::pair<std::string, int>> ExtraerTop10000(std::map <std::string, int>& visitasPoblados){
+vector<pair<string, int>> ExtraerTop10000(map <string, int>& visitasPoblados){
     auto comp = [](const auto& a,  const auto& b){return a.second > b.second;};
 
-    std::priority_queue <
-        std::pair <std::string, int>, //{frecuencia, ciudad}
-        std::vector <std::pair<std::string, int>>,
+    priority_queue <
+        pair <string, int>, //{frecuencia, ciudad}
+        vector <pair<string, int>>,
         decltype(comp) //Menor frecuencia al tope
     > minHeap(comp);
 
@@ -128,12 +120,12 @@ std::vector<std::pair<std::string, int>> ExtraerTop10000(std::map <std::string, 
         }
     }
 
-    std::vector<std::pair<std::string, int>> topPoblados;
+    vector<pair<string, int>> topPoblados;
     while(!minHeap.empty()){
         topPoblados.push_back(minHeap.top());
         minHeap.pop();
     }
 
-    std::reverse(topPoblados.begin(), topPoblados.end());
+    reverse(topPoblados.begin(), topPoblados.end());
     return topPoblados;
 }

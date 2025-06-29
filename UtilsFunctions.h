@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UTILSFUNCTIONS_H
-#define UTILSFUNCTIONS_H
+#ifndef UTILS_FUNCTIONS_H
+#define UTILS_FUNCTIONS_H
 
 #include <iostream>
 #include <string>
@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <omp.h>
 
+using namespace std;
+
 /*
 * @brief Separa un string segùn el delimitador especificado, si no se especifìca el delimitador,
 * su valor por defecto es el espacio (' ').
@@ -22,7 +24,7 @@
 * @return Retorna una vector de strings, que contiene los sub-string separados por el delimitador
 * correspondiente.
 */
-std::vector <std::string> SplitStr(const std::string& str, char delimiter);
+vector <string> SplitStr(const string& str, char delimiter);
 
 /*
 * @brief Transforma un string de 3 carácteres, que representa un mes, en inglés ó español, a su
@@ -38,7 +40,7 @@ std::vector <std::string> SplitStr(const std::string& str, char delimiter);
 *   int mes = mesAInt("Ene"); //mes = 1.
 *   int mes = mesAInt("Oct"); //mes = 10.
 */
-int MesAInt(const std::string& mes);
+int MesAInt(const string& mes);
 
 /*
 * @brief Extrae el estrato social al que corresponde una persona en base al CP origen.
@@ -49,17 +51,17 @@ int MesAInt(const std::string& mes);
 *
 * @return Retorna el vector estratos modificado.
 */
-std::vector <int>& ExtraerEstrato(const std::string& cpOrigen, std::vector<int>& estratos);
+vector <int>& ExtraerEstrato(const string& cpOrigen, vector<int>& estratos);
 
 /*
-* @brief Calcula la edad de la persona en base a la fecha actual del equipo.
+* @brief Calcula la edad de la persona en base a la fecha de entrega (02-07-2025).
 *
 * @param birthDay (std::string&): Referencia del string correspondiente a la fecha de nacimiento
 * de una persona.
 *
 * @return Retorna la edad correspondiente.
 */
-int CalcularEdad(const std::string& birthDay);
+int CalcularEdad(const string& birthDay);
 
 /*
 * @brief Calcula la edad promedio de un vector que contiene edades. Y verifica que el tamaño del vector sea igual a la
@@ -70,7 +72,7 @@ int CalcularEdad(const std::string& birthDay);
 *
 * @return Retorna la edad promedio del vector.
 */
-float EdadPromedio (std::vector <int>& edades, int& count);
+float EdadPromedio(std::vector <int>& edades, int& count);
 
 /*
 * @brief Calcula la edad mediana de un vector que contiene edades.
@@ -79,7 +81,7 @@ float EdadPromedio (std::vector <int>& edades, int& count);
 *
 * @return Retorna la edad mediana del vector.
 */
-float EdadMediana(std::vector <int>& edades);
+float EdadMediana(vector <int>& edades);
 
 /*
 * @brief Segmenta en 4 rangos las edades de un vector que contiene edades.
@@ -92,7 +94,7 @@ float EdadMediana(std::vector <int>& edades);
 *
 * @warning FUNCIÓN PARALELA
 */
-std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <std::string, int>& edadesSegm);
+map <string, int>& SegmentarEdad(vector <int>& edades, map <string, int>& edadesSegm);
 
 /*
 * @brief Extrae la provincia y ciudad a la que viaja una persona en base al CP destino.
@@ -102,7 +104,7 @@ std::map <std::string, int>& SegmentarEdad(std::vector <int>& edades, std::map <
 *
 * @return Retorna el map visitas modificado.
 */
-std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::map <std::string, int>& visitas);
+map <string, int>& VisitasCiudad(const string& cpDestino, map <string, int>& visitas);
 
 /*
 * @brief Extrae las 10000 ciudades más visitadas.
@@ -112,5 +114,5 @@ std::map <std::string, int>& VisitasCiudad(const std::string& cpDestino, std::ma
 *
 * @return Retorna un vector de pares con el número de la ciudad y su cantidad de visitas.
 */
-std::vector<std::pair<std::string, int>> ExtraerTop10000(std::map <std::string, int>& visitasPoblados);
+vector<pair<string, int>> ExtraerTop10000(map <string, int>& visitasPoblados);
 #endif

@@ -8,257 +8,323 @@
 #include <ctime>
 #include <omp.h>
 
-//Libreria funciones auxiliares
 #include "UtilsFunctions.h"
 
-int main(){
+using namespace std;
+
+int main() {
     omp_set_num_threads(omp_get_max_threads());
-    std::ifstream file("eldoria.csv");
+    
+    int count = 0;
+    const int ChunkSize = 1000000;
+    
+    vector <int> personasPorEstratoGlobal(10, 0);
+    vector <float> percentPorEstratoGlobal(10, 0);
+    
+    map <string, int> personasPorEspecieGlobal = {
+        {"Humana", 0}, {"Elfica", 0}, {"Enana", 0}, {"Hombre Bestia", 0}
+    };
+    map <string, int> personasPorGeneroGlobal = {
+        {"MACHO", 0}, {"HEMBRA", 0}, {"OTRO", 0}
+    };
+
+    vector <int> edadesHumanGlobal, edadesElfGlobal, edadesEnanaGlobal, edadesHBestiaGlobal;
+    vector <int> edadesMachoGlobal, edadesHembraGlobal, edadesOtroGlobal;
+
+    int dependientesGlobal = 0;
+    int independientesGlobal = 0;
+
+    map <string, int> visitasPobladosGlobal;
+    vector<pair<string, int>> top10000PobladosGlobal;
+
+    ifstream file("eldoria.csv");
     if (!file.is_open()){
-        std::cerr << "Error: No se puede abrir el archivo" << std::endl;
+        cerr << "Error: No se puede abrir el archivo" << endl;
         return 1;
     };
 
-    int count = 0;
-    bool flag = true;
-    std::vector <int> personasPorEstrato = {0,0,0,0,0,0,0,0,0,0};
-    std::vector <float> percentPorEstrato = {0,0,0,0,0,0,0,0,0,0};
+    string line;
+    getline(file, line); //Extraemos los encabezados.
 
-    std::map <std::string, int> personasPorEspecie = {
-        {"Humana", 0}, {"Elfica", 0}, {"Enana", 0}, {"Hombre Bestia", 0}
-    };
-    std::map <std::string, int> personasPorGenero = {
-        {"MACHO", 0}, {"HEMBRA", 0}, {"OTRO", 0}
-    };
-    std::vector <int> edadesHuman, edadesElf, edadesEnana, edadesHBestia;
-    std::vector <int> edadesMacho, edadesHembra, edadesOtro;
+    while (file.good()){ //Procesamiento por bloques
+        vector <string> lineChunk;
+        for (int i=0; i<ChunkSize && getline(file, line); i++){
+            lineChunk.push_back(line);
+            count++;
+        }
+        if (lineChunk.empty()){
+            break;
+        }
 
-    int dependientes = 0;
-    int independientes = 0;
+        #pragma omp parallel
+        {   
+            vector <int> personasPorEstratoLocal(10, 0);
 
-    std::map <std::string, int> visitasPoblados;
-    std::vector<std::pair<std::string, int>> top10000Poblados;
+            map <string, int> personasPorEspecieLocal = {
+                {"Humana", 0}, {"Elfica", 0}, {"Enana", 0}, {"Hombre Bestia", 0}
+            };
+            map <string, int> personasPorGeneroLocal = {
+                {"MACHO", 0}, {"HEMBRA", 0}, {"OTRO", 0}
+            };
+            
+            vector <int> edadesHumanLocal, edadesElfLocal, edadesEnanaLocal, edadesHBestiaLocal;
+            vector <int> edadesMachoLocal, edadesHembraLocal, edadesOtroLocal;
 
-    std::string headers;
-    std::getline(file, headers);
+            int dependientesLocal = 0;
+            int independientesLocal = 0;
 
-    #pragma omp parallel
-    {
-        std::string linea;
-        while (flag){ //Change condition -> flag
+            map <string, int> visitasPobladosLocal;
+
+            int sizeLineChunk = lineChunk.size();
+
+            #pragma omp for
+            for (int i=0; i<sizeLineChunk; i++){
+                vector <string> tokens = SplitStr(lineChunk[i], ';');
+                personasPorEstratoLocal = ExtraerEstrato(tokens[6], personasPorEstratoLocal); //P.1-2
+
+                int edad = CalcularEdad(tokens[5]); //P3
+                string especie = tokens[1];
+                string genero = tokens[2];
+                especie.erase(0,1); //Eliminamos la comilla doble del inicio.
+                especie.pop_back(); //Eliminamos la comilla doble del final.
+                genero.erase(0,1);
+                genero.pop_back();
+                
+                if (especie == "Humana" || especie == "HUMANA"){
+                    edadesHumanLocal.push_back(edad);
+                    personasPorEspecieLocal["Humana"] += 1;
+                } else if (especie == "Elfica" || especie == "ELFICA"){
+                    edadesElfLocal.push_back(edad);
+                    personasPorEspecieLocal["Elfica"] += 1;
+                } else if (especie == "Enana" || especie == "ENANA"){
+                    edadesEnanaLocal.push_back(edad);
+                    personasPorEspecieLocal["Enana"] += 1;
+                } else if (especie == "Hombre Bestia" || especie == "HOMBRE BESTIA"){
+                    edadesHBestiaLocal.push_back(edad);
+                    personasPorEspecieLocal["Hombre Bestia"] += 1;
+                }
+                if (genero == "MACHO" || genero == "Macho"){
+                    edadesMachoLocal.push_back(edad);
+                    personasPorGeneroLocal["MACHO"] += 1;
+                } else if (genero == "HEMBRA" || genero == "Hembra"){
+                    edadesHembraLocal.push_back(edad);
+                    personasPorGeneroLocal["HEMBRA"] += 1;
+                } else if (genero == "OTRO" || genero == "Otro"){
+                    edadesOtroLocal.push_back(edad);
+                    personasPorGeneroLocal["OTRO"] += 1;
+                }
+                
+                if ((edad<15) || (edad>64)){ //P.7
+                    dependientesLocal += 1;
+                } else {
+                    independientesLocal += 1;
+                }
+
+                VisitasCiudad(tokens[7], visitasPobladosLocal); //P.8
+            }
+
             #pragma omp critical
             {
-                if (std::getline(file, linea)){ 
-                    std::vector <std::string> tokens = SplitStr(linea, ';');
-                    personasPorEstrato = ExtraerEstrato(tokens[6], personasPorEstrato); //P.1-2
-                    
-                    int edad = CalcularEdad(tokens[5]); //P3
-                    std::string especie = tokens[1];
-                    std::string genero = tokens[2];
-                    especie.erase(0,1); //Eliminamos la comilla doble del inicio.
-                    especie.pop_back(); //Eliminamos la comilla doble del final.
-                    genero.erase(0,1);
-                    genero.pop_back();
-                    if (especie == "Humana"){
-                        edadesHuman.push_back(edad);
-                        personasPorEspecie["Humana"] += 1;
-                    } else if (especie == "Elfica"){
-                        edadesElf.push_back(edad);
-                        personasPorEspecie["Elfica"] += 1;
-                    } else if (especie == "Enana"){
-                        edadesEnana.push_back(edad);
-                        personasPorEspecie["Enana"] += 1;
-                    } else if (especie == "Hombre Bestia"){
-                        edadesHBestia.push_back(edad);
-                        personasPorEspecie["Hombre Bestia"] += 1;
-                    }
-                    if (genero == "MACHO"){
-                        edadesMacho.push_back(edad);
-                        personasPorGenero["MACHO"] += 1;
-                    } else if (genero == "HEMBRA"){
-                        edadesHembra.push_back(edad);
-                        personasPorGenero["HEMBRA"] += 1;
-                    } else if (genero == "OTRO"){
-                        edadesOtro.push_back(edad);
-                        personasPorGenero["OTRO"] += 1;
-                    }
-
-                    if ((edad<15) || (edad>64)){ //P.7
-                        dependientes += 1;
-                    } else {
-                        independientes += 1;
-                    }
-
-                    VisitasCiudad(tokens[7], visitasPoblados); //P.8
-                    count++;
-                } else {
-                    flag = false;
+                for(int i=0; i<10; i++){
+                    personasPorEstratoGlobal[i] += personasPorEstratoLocal[i];
+                }
+                
+                for (auto& par : personasPorEspecieLocal){
+                    personasPorEspecieGlobal[par.first] += par.second;
+                }
+                
+                for (auto& par : personasPorGeneroLocal){
+                    personasPorGeneroGlobal[par.first] += par.second;
+                }
+                
+                edadesHumanGlobal.insert(edadesHumanGlobal.end(), edadesHumanLocal.begin(), edadesHumanLocal.end());
+                edadesElfGlobal.insert(edadesElfGlobal.end(), edadesElfLocal.begin(), edadesElfLocal.end());
+                edadesEnanaGlobal.insert(edadesEnanaGlobal.end(), edadesEnanaLocal.begin(), edadesEnanaLocal.end());
+                edadesHBestiaGlobal.insert(edadesHBestiaGlobal.end(), edadesHBestiaLocal.begin(), edadesHBestiaLocal.end());
+                edadesMachoGlobal.insert(edadesMachoGlobal.end(), edadesMachoLocal.begin(), edadesMachoLocal.end());
+                edadesHembraGlobal.insert(edadesHembraGlobal.end(), edadesHembraLocal.begin(), edadesHembraLocal.end());
+                edadesOtroGlobal.insert(edadesOtroGlobal.end(), edadesOtroLocal.begin(), edadesOtroLocal.end());
+                
+                dependientesGlobal += dependientesLocal;
+                independientesGlobal += independientesLocal;
+                
+                for (const auto& par : visitasPobladosLocal){
+                    visitasPobladosGlobal[par.first] += par.second;
                 }
             }
         }
     }
     file.close();
-    
-    //Ordenamiento de los vectores de edad - P.4
-    std::sort(edadesHuman.begin(), edadesHuman.end());
-    std::sort(edadesElf.begin(), edadesElf.end());
-    std::sort(edadesEnana.begin(), edadesEnana.end());
-    std::sort(edadesHBestia.begin(), edadesHBestia.end());
 
-    std::sort(edadesMacho.begin(), edadesMacho.end());
-    std::sort(edadesHembra.begin(), edadesHembra.end());
-    std::sort(edadesOtro.begin(), edadesOtro.end());
+    //Ordenamiento de los vectores de edad - P.4
+    sort(edadesHumanGlobal.begin(), edadesHumanGlobal.end());
+    sort(edadesElfGlobal.begin(), edadesElfGlobal.end());
+    sort(edadesEnanaGlobal.begin(), edadesEnanaGlobal.end());
+    sort(edadesHBestiaGlobal.begin(), edadesHBestiaGlobal.end());
+
+    sort(edadesMachoGlobal.begin(), edadesMachoGlobal.end());
+    sort(edadesHembraGlobal.begin(), edadesHembraGlobal.end());
+    sort(edadesOtroGlobal.begin(), edadesOtroGlobal.end());
 
     //Segmentación de edades - P.5-6
     std::map <std::string, int> edadesHumanSegm, edadesElfSegm, edadesEnanaSegm, edadesHBestiaSegm;
     std::map <std::string, int> edadesMachoSegm, edadesHembraSegm, edadesOtroSegm;
 
-    edadesHumanSegm = SegmentarEdad(edadesHuman, edadesHumanSegm);
-    edadesElfSegm = SegmentarEdad(edadesElf, edadesElfSegm);
-    edadesEnanaSegm = SegmentarEdad(edadesEnana, edadesEnanaSegm);
-    edadesHBestiaSegm = SegmentarEdad(edadesHBestia, edadesHBestiaSegm);
+    edadesHumanSegm = SegmentarEdad(edadesHumanGlobal, edadesHumanSegm);
+    edadesElfSegm = SegmentarEdad(edadesElfGlobal, edadesElfSegm);
+    edadesEnanaSegm = SegmentarEdad(edadesEnanaGlobal, edadesEnanaSegm);
+    edadesHBestiaSegm = SegmentarEdad(edadesHBestiaGlobal, edadesHBestiaSegm);
 
-    edadesMachoSegm = SegmentarEdad(edadesMacho, edadesMachoSegm);
-    edadesHembraSegm = SegmentarEdad(edadesHembra, edadesHembraSegm);
-    edadesOtroSegm = SegmentarEdad(edadesOtro, edadesOtroSegm);
+    edadesMachoSegm = SegmentarEdad(edadesMachoGlobal, edadesMachoSegm);
+    edadesHembraSegm = SegmentarEdad(edadesHembraGlobal, edadesHembraSegm);
+    edadesOtroSegm = SegmentarEdad(edadesOtroGlobal, edadesOtroSegm);
 
     //Extraer top 10000 poblados más visitados
-    top10000Poblados = ExtraerTop10000(visitasPoblados);
+    top10000PobladosGlobal = ExtraerTop10000(visitasPobladosGlobal); 
 
-    std::cout << "Total de datos:" << count << std::endl; //BORRAR
-/*
+    cout << "Total de datos: " << count << endl;
+
     //RESPUESTAS----------
-    std::cout << "-----\nRespuestas:" << std::endl;
+    cout << "-----\nRespuestas:" << endl;
 
     //1. Personas por estrato
-    std::cout << "1. Personas por estrato:" << std::endl;
+    cout << "1. Personas por estrato:" << endl;
     for(int i=0; i<10; i++){
-        std::cout << "   Personas en estrato " << i << ": " << personasPorEstrato[i] << std::endl;
+        cout << "   Personas en estrato " << i << ": " << personasPorEstratoGlobal[i] << endl;
     }
-    std::cout << "-----" << std::endl;
+    cout << "-----" << endl;
 
     //2.Porcentaje por estrato
     float countDb = count;
-    std::cout << "2. Porcentaje por estrato:" << std::endl;
+    cout << "2. Porcentaje por estrato:" << endl;
     for (int i=0; i<10; i++){
-        percentPorEstrato[i] = (personasPorEstrato[i]/countDb)*100;
-        std::cout << "   Porcentaje estrato "<< i << ": " << percentPorEstrato[i] << "%" << std::endl;
+        percentPorEstratoGlobal[i] = (personasPorEstratoGlobal[i]/countDb)*100;
+        cout << "   Porcentaje estrato "<< i << ": " << percentPorEstratoGlobal[i] << "%" << endl;
     }
-    std::cout << "-----" << std::endl;
+    cout << "-----" << endl;
 
     //3. Edad promedio por especie y genero
-    std::cout << "3. Edades promedio por especie y género:" << std::endl;
-    std::cout << "   Edad promedio especie Humana: " << EdadPromedio(edadesHuman, personasPorEspecie["Humana"]) << std::endl;
-    std::cout << "   Edad promedio especie Elfica: " << EdadPromedio(edadesElf, personasPorEspecie["Elfica"]) << std::endl;
-    std::cout << "   Edad promedio especie Enana: " << EdadPromedio(edadesEnana, personasPorEspecie["Enana"]) << std::endl;
-    std::cout << "   Edad promedio especie Hombre Bestia: " << EdadPromedio(edadesHBestia, personasPorEspecie["Hombre Bestia"]) << std::endl;
-    std::cout << std::endl;
-    std::cout << "   Edad promedio género Macho: " << EdadPromedio(edadesMacho, personasPorGenero["MACHO"]) << std::endl;
-    std::cout << "   Edad promedio género Hembra: " << EdadPromedio(edadesHembra, personasPorGenero["HEMBRA"]) << std::endl;
-    std::cout << "   Edad promedio género Otro: " << EdadPromedio(edadesOtro, personasPorGenero["OTRO"]) << std::endl;
-    std::cout << "-----" << std::endl;
+    cout << "3. Edades promedio por especie y género:" << endl;
+    cout << "   Edad promedio especie Humana: " << EdadPromedio(edadesHumanGlobal, personasPorEspecieGlobal["Humana"]) << endl;
+    cout << "   Edad promedio especie Elfica: " << EdadPromedio(edadesElfGlobal, personasPorEspecieGlobal["Elfica"]) << endl;
+    cout << "   Edad promedio especie Enana: " << EdadPromedio(edadesEnanaGlobal, personasPorEspecieGlobal["Enana"]) << endl;
+    cout << "   Edad promedio especie Hombre Bestia: " << EdadPromedio(edadesHBestiaGlobal, personasPorEspecieGlobal["Hombre Bestia"]) << endl;
+    cout << endl;
+    cout << "   Edad promedio género Macho: " << EdadPromedio(edadesMachoGlobal, personasPorGeneroGlobal["MACHO"]) << endl;
+    cout << "   Edad promedio género Hembra: " << EdadPromedio(edadesHembraGlobal, personasPorGeneroGlobal["HEMBRA"]) << endl;
+    cout << "   Edad promedio género Otro: " << EdadPromedio(edadesOtroGlobal, personasPorGeneroGlobal["OTRO"]) << endl;
+    cout << "-----" << endl;
 
     //4. Edad mediana por especie y genero
-    std::cout << "4. Edades mediana por especie y género:" << std::endl;
-    std::cout << "   Edad mediana especie Humana: " << EdadMediana(edadesHuman) << std::endl;
-    std::cout << "   Edad mediana especie Elfica: " << EdadMediana(edadesElf) << std::endl;
-    std::cout << "   Edad mediana especie Enana: " << EdadMediana(edadesEnana) << std::endl;
-    std::cout << "   Edad mediana especie Hombre Bestia: " << EdadMediana(edadesHBestia) << std::endl;
-    std::cout << std::endl;
-    std::cout << "   Edad mediana género Macho: " << EdadMediana(edadesMacho) << std::endl;
-    std::cout << "   Edad mediana género Hembra: " << EdadMediana(edadesHembra) << std::endl;
-    std::cout << "   Edad mediana género Otro: " << EdadMediana(edadesOtro) << std::endl;
-    std::cout << "-----" << std::endl;
+    cout << "4. Edades mediana por especie y género:" << endl;
+    cout << "   Edad mediana especie Humana: " << EdadMediana(edadesHumanGlobal) << endl;
+    cout << "   Edad mediana especie Elfica: " << EdadMediana(edadesElfGlobal) << endl;
+    cout << "   Edad mediana especie Enana: " << EdadMediana(edadesEnanaGlobal) << endl;
+    cout << "   Edad mediana especie Hombre Bestia: " << EdadMediana(edadesHBestiaGlobal) << endl;
+    cout << endl;
+    cout << "   Edad mediana género Macho: " << EdadMediana(edadesMachoGlobal) << endl;
+    cout << "   Edad mediana género Hembra: " << EdadMediana(edadesHembraGlobal) << endl;
+    cout << "   Edad mediana género Otro: " << EdadMediana(edadesOtroGlobal) << endl;
+    cout << "-----" << endl;
 
     //5. Proporción segmentada de la población
-    std::cout << "5. Proporción segmentada de la población según especie y género:" << std::endl;
-    std::cout << "   Especie Humana: " << std::endl << "    ";
-    float size = edadesHuman.size();
+    cout << "5. Proporción segmentada de la población según especie y género:" << endl;
+    cout << "   Especie Humana: " << endl << "    ";
+    float size = edadesHumanGlobal.size();
     for(auto& pair:edadesHumanSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "   Especie Elfica: " << std::endl << "    ";
-    size = edadesElf.size();
+    cout << endl;
+    cout << "   Especie Elfica: " << endl << "    ";
+    size = edadesElfGlobal.size();
     for(auto& pair:edadesElfSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "   Especie Enana: " << std::endl << "    ";
-    size = edadesEnana.size();
+    cout << endl;
+    cout << "   Especie Enana: " << endl << "    ";
+    size = edadesEnanaGlobal.size();
     for(auto& pair:edadesEnanaSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "   Especie Hombre Bestia: " << std::endl << "    ";
-    size = edadesHBestia.size();
+    cout << endl;
+    cout << "   Especie Hombre Bestia: " << endl << "    ";
+    size = edadesHBestiaGlobal.size();
     for(auto& pair:edadesHBestiaSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "   Género Macho: " << std::endl << "    ";
-    size = edadesMacho.size();
+    cout << endl;
+    cout << endl;
+    cout << "   Género Macho: " << endl << "    ";
+    size = edadesMachoGlobal.size();
     for(auto& pair:edadesMachoSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "   Género Hembra: " << std::endl << "    ";
-    size = edadesHembra.size();
+    cout << endl;
+    cout << "   Género Hembra: " << endl << "    ";
+    size = edadesHembraGlobal.size();
     for(auto& pair:edadesHembraSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "   Género Otro: " << std::endl << "    ";
-    size = edadesOtro.size();
+    cout << endl;
+    cout << "   Género Otro: " << endl << "    ";
+    size = edadesOtroGlobal.size();
     for(auto& pair:edadesOtroSegm){
-        std::cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
+        cout << pair.first << ":" << (pair.second/size)*100 << "%" << " | ";
     }
-    std::cout << std::endl;
-    std::cout << "-----" << std::endl;
+    cout << endl;
+    cout << "-----" << endl;
 
     //6. Pirámide de edades
-    std::cout << "6. Pirámide de edades:" << std::endl;
-    std::cout << "   Especie Humana" <<std::endl;
+    cout << "6. Pirámide de edades:" << endl;
+    cout << "   Especie Humana" <<endl;
     for (auto& segm : edadesHumanSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "   Especie Elfica" <<std::endl;
+    cout << "   Especie Elfica" <<endl;
     for (auto& segm : edadesElfSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "   Especie Enana" <<std::endl;
+    cout << "   Especie Enana" <<endl;
     for (auto& segm : edadesEnanaSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "   Especie Hombre Bestia" <<std::endl;
+    cout << "   Especie Hombre Bestia" <<endl;
     for (auto& segm : edadesHBestiaSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << std::endl;
-    std::cout << "   Género Macho" <<std::endl;
+    cout << endl;
+    cout << "   Género Macho" <<endl;
     for (auto& segm : edadesMachoSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "   Género Hembra" <<std::endl;
+    cout << "   Género Hembra" <<endl;
     for (auto& segm : edadesHembraSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "   Género Otro" <<std::endl;
+    cout << "   Género Otro" <<endl;
     for (auto& segm : edadesOtroSegm){
-        std::cout << "     " << segm.first << ":" << segm.second << " personas" << std::endl;
+        cout << "     " << segm.first << ":" << segm.second << " personas" << endl;
     }
-    std::cout << "-----" << std::endl;
+    cout << "-----" << endl;
 
     //7. Índice de dependencia
-    std::cout << "7. Índice de dependencia: " << (dependientes*1.0f)/(independientes*1.0f) << std::endl;
-    std::cout << "-----" << std::endl;
+    cout << "7. Índice de dependencia: " << (dependientesGlobal*1.0f)/(independientesGlobal*1.0f) << endl;
+    cout << "-----" << endl;
 
     //8. 10000 poblados más visitados
-    std::cout << "8. 10000 poblados más visitados" << std::endl;
-    for (std::pair par:top10000Poblados){
-        std::cout << "Ciudad " << par.first << ": " << par.second << "visitas" << std::endl;
+    cout << "8. 10000 poblados más visitados" << endl;
+
+    ofstream archivo("Top 10000 poblados.txt");
+    if (!archivo){
+        cout << "No se pudo cre4ear el archivo" << endl;
+        return 1;
     }
-*/
+
+    archivo << "Top 10000 poblados.txt\n";
+
+    for (std::pair par:top10000PobladosGlobal){
+        archivo << "Ciudad " << par.first << ": " << par.second << "visitas\n";
+    }
+    archivo.close();
     return 0;
 }
