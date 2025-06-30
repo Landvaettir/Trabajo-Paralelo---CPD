@@ -13,7 +13,7 @@
 using namespace std;
 
 int main() {
-    omp_set_num_threads(omp_get_max_threads());
+    omp_set_num_threads(omp_get_max_threads()); //Configuración para usar el máximo de hilos disponibles.
     
     int count = 0;
     const int ChunkSize = 1000000;
@@ -28,8 +28,8 @@ int main() {
         {"MACHO", 0}, {"HEMBRA", 0}, {"OTRO", 0}
     };
 
-    vector <int> edadesHumanGlobal, edadesElfGlobal, edadesEnanaGlobal, edadesHBestiaGlobal;
-    vector <int> edadesMachoGlobal, edadesHembraGlobal, edadesOtroGlobal;
+    vector <int> edadesHumanGlobal, edadesElfGlobal, edadesEnanaGlobal, edadesHBestiaGlobal; //Vectores de edades por especie.
+    vector <int> edadesMachoGlobal, edadesHembraGlobal, edadesOtroGlobal; //Vectores de edades por género.
 
     int dependientesGlobal = 0;
     int independientesGlobal = 0;
@@ -46,7 +46,7 @@ int main() {
     string line;
     getline(file, line); //Extraemos los encabezados.
 
-    while (file.good()){ //Procesamiento por bloques
+    while (file.good()){ //Procesamiento por bloques.
         vector <string> lineChunk;
         for (int i=0; i<ChunkSize && getline(file, line); i++){
             lineChunk.push_back(line);
@@ -56,7 +56,7 @@ int main() {
             break;
         }
 
-        #pragma omp parallel
+        #pragma omp parallel 
         {   
             vector <int> personasPorEstratoLocal(10, 0);
 
@@ -123,7 +123,7 @@ int main() {
                 VisitasCiudad(tokens[7], visitasPobladosLocal); //P.8
             }
 
-            #pragma omp critical
+            #pragma omp critical //Se actualizan las variables globales, agregando la información de las variables locales.
             {
                 for(int i=0; i<10; i++){
                     personasPorEstratoGlobal[i] += personasPorEstratoLocal[i];
